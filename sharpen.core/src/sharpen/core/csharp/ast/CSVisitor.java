@@ -239,4 +239,9 @@ public class CSVisitor {
 
 	public void visit(CSGotoStatement node) {
 	}
+	
+	public void visit(CSInstanceofExpression node) {
+	}
+	
+	
 }

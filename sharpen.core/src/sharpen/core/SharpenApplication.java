@@ -32,9 +32,12 @@ import org.eclipse.jdt.core.*;
 import sharpen.core.framework.*;
 import sharpen.core.io.*;
 
+
+
 /**
  * Start this application with: <code>
- * java -cp startup.jar org.eclipse.core.launcher.Main -application sharpen.core.application resourcePath
+ * java -cp eclipse/plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar org.eclipse.core.launcher.Main -application sharpen.core.application resourcePath
+ * java -cp startup.jar org.eclipse.core.launcher.Main -application sharpen.core.application resourcePath (Eclipse 3.2 and earlier)
  * </code>
  */
 public class SharpenApplication implements IApplication {

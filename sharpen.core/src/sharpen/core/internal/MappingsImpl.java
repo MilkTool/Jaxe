@@ -23,12 +23,12 @@ public class MappingsImpl implements Mappings {
 	private final PreserveFullyQualifiedNamesState _preserveFQNState = my(PreserveFullyQualifiedNamesState.class);
 	private String _currentNamespace;
 	
-	private Map<ITypeBinding, Map<IMethodBinding, String>> _constructorMethods = new HashMap<>();
+	private Map<ITypeBinding, Map<IMethodBinding, String>> _constructorMethods = new HashMap();
 	
 	private Map<String, List<IMethodBinding>> _overloadLookup = new HashMap<String, List<IMethodBinding>>();
-	private Map<IMethodBinding,String> _methodOverloads = new HashMap<>();
+	private Map<IMethodBinding,String> _methodOverloads = new HashMap();
 	
-	@Override
+	//@Override
 	public String methodOverload(IMethodBinding binding, String name) {
 		// check if method already registered
 		if(_methodOverloads.containsKey(binding)) {
@@ -40,7 +40,7 @@ public class MappingsImpl implements Mappings {
 		// create overload lookup table if needed
 		List<IMethodBinding> overloads;
 		if(!_overloadLookup.containsKey(fqn)) {
-			overloads = new ArrayList<>();
+			overloads = new ArrayList();
 			_overloadLookup.put(fqn, overloads);
 		}
 		else {
@@ -63,7 +63,7 @@ public class MappingsImpl implements Mappings {
 		return methodName;
 	}
 	
-	@Override
+	//@Override
 	public String constructorMethod(ITypeBinding type, IMethodBinding ctor) {
 		// TODO: we will need to check how to handle ctor overloading if the base class is a built in type
 		/*if(!type.isFromSource()) {
@@ -75,6 +75,8 @@ public class MappingsImpl implements Mappings {
 		Map<IMethodBinding, String> names = _constructorMethods.get(type);
 		if(!names.containsKey(ctor)) {
 			names.put(ctor, "__ctor" + names.size());
+			//names.put(ctor, "__create_" + ctor.getDeclaringClass().getName() + names.size());
+			//System.out.println("__create_" + ctor.getDeclaringClass().getName() + names.size() + "  ----  " + ctor.getDeclaringClass().getBinaryName());
 		}
 		return names.get(ctor);
 	}
@@ -352,12 +354,12 @@ public class MappingsImpl implements Mappings {
 		return _configuration.mappedTypeName(typeName, defaultValue);
 	}	
 	
-	@Override
+	//@Override
 	public String currentNamespace() {
 		return _currentNamespace;
 	}
 	
-	@Override
+	//@Override
 	public void currentNamespace(String currentNamespace) {
 		_currentNamespace = currentNamespace;
 	}

@@ -56,12 +56,25 @@ public class HaxePrinter extends CSVisitor {
 	private List<CSUsing> printableUsingList(Iterable<CSUsing> usings) {
 		List<CSUsing> list = new ArrayList<CSUsing>();
 		for (CSUsing using : usings) {
-			list.add(using);
+			if (!using.namespace().startsWith("jaxe.lang")) {
+				list.add(using);
+			}
 		}
+		
+		// Import java.lang in each class
+		CSUsing newUsing = new CSUsing("jaxe.lang.*");
+		list.add(newUsing);
+		
 		Collections.sort(list, new Comparator<CSUsing>() {
 			public int compare(CSUsing a, CSUsing b) {
-				boolean ia = a.namespace().startsWith("System");
-				boolean ib = b.namespace().startsWith("System");
+				return a.namespace().compareTo(b.namespace());
+			}
+		});
+		
+		/*Collections.sort(list, new Comparator<CSUsing>() {
+			public int compare(CSUsing a, CSUsing b) {
+				boolean ia = a.namespace().startsWith("java.lang");
+				boolean ib = b.namespace().startsWith("java.lang");
 
 				if (ia && ib)
 					return a.namespace().compareTo(b.namespace());
@@ -72,8 +85,10 @@ public class HaxePrinter extends CSVisitor {
 				else
 					return a.namespace().compareTo(b.namespace());
 			}
-		});
+		});*/
+		
 		return list;
+		
 	}
 
 	static final Pattern META_VARIABLE_PATTERN = Pattern.compile("\\$(\\w+)");
@@ -191,6 +206,7 @@ public class HaxePrinter extends CSVisitor {
 
 	public void visit(CSTypeReference node) {
 		write(node.typeName());
+		//System.out.println("HaxePrinter.visit(CSTypeReference node): node.typeName()=" + node.typeName() + "  typeArguments=" + node.typeArguments().size());
 		writeTypeArguments(node);
 	}
 
@@ -216,11 +232,22 @@ public class HaxePrinter extends CSVisitor {
 
 	private void writeTypeHeader(CSTypeDeclaration node) {
 		writeMemberHeader(node);
+		
+		if (node.name().equals("TestInterface")) {
+			System.out.println("[DEBUG] writeTypeHeader: TestInterface is interface ? " +  node.isInterface());
+		}
+		
 		if (node.isInterface()) {
 			if (node.partial())
 				_writer.write("/*partial*/ ");
 			write("interface " + node.name());
+			if (node.name().equals("TestInterface")) {
+				System.out.println("[DEBUG] writeTypeHeader 2: TestInterface is interface " +  node.isInterface());
+			}
 		} else if (node instanceof CSClass) {
+			if (node.name().equals("TestInterface")) {
+				System.out.println("[DEBUG] writeTypeHeader 3: TestInterface is class  !! " +  node.isInterface());
+			}
 			CSClass classNode = (CSClass) node;
 			write(classModifier(classNode.modifier()));
 			if (node.partial())
@@ -265,21 +292,37 @@ public class HaxePrinter extends CSVisitor {
 		{
 			write(" extends ");
 			node.baseType().accept(this);
+		} else if (!node.isInterface()) {
+			write(" extends JObject ");
 		}
 		
 		List<CSTypeReferenceExpression> baseTypes = node.interfaces();
 		if (baseTypes.isEmpty()) {
 			return;
 		}
+		
+		if (node.isInterface()) {
+			write(" extends ");
+		} else {
+			write(" implements ");
+		}
+		
+		
+		//System.out.println("HaxePrinter.writeBaseTypes(): baseTypes.size()=" + baseTypes.size());
 
 		for (int i = 0; i < baseTypes.size(); i++) {
-			CSTypeReferenceExpression baseType = baseTypes.get(i);
-			if (i > 0 || node.baseType() != null) {
+			
+			CSTypeReference baseType = (CSTypeReference)baseTypes.get(i);
+//			if ((i > 0) && (baseType != null)) {
+//				write(",");
+//			}
+//			write(baseType.typeName());
+			
+			
+			if ((i > 0) && (baseType != null)) {
 				write(",");
 			}
-
-			write(" implements ");
-			baseType.accept(this);
+			baseType.accept(this);			
 		}
 	}
 
@@ -307,7 +350,7 @@ public class HaxePrinter extends CSVisitor {
 			
 			writeLine("function new()");
 	        enterBody();
-	        if(chained != null) {
+	        if(chained == null) {
 	        	writeIndentedLine("super();");
 	        }
 	        leaveBody();
@@ -359,8 +402,11 @@ public class HaxePrinter extends CSVisitor {
 		if (!node.parameter()) {
 			write("var ");
 		}
+		//System.out.println("visit(CSVariableDeclaration node): node name = " + node.name());
 		if (null != node.name()) {
 			write(node.name());
+		} else { // FIXME Hack to handle exception declaration in catch statements. Why is node name null ????
+			write("e"); 
 		}
 		write(" : ");
 		node.type().accept(this);
@@ -492,6 +538,15 @@ public class HaxePrinter extends CSVisitor {
 			node.expression().accept(this);
 			writeLine(";");
 		}
+	}
+	
+	@Override
+	public void visit(CSInstanceofExpression node) {
+		write("Jaxe.instanceof(");
+		node.lhs().accept(this);
+		write(", ");
+		node.rhs().accept(this);
+		write(")");
 	}
 
 	private void printPrecedingComments(CSNode node) {
@@ -688,11 +743,13 @@ public class HaxePrinter extends CSVisitor {
 	public void visit(CSCatchClause node) {
 		writeIndented("catch");
 		CSVariableDeclaration ex = node.exception();
+		//System.out.println("visit(CSCatchClause node)");
 		if (ex != null) {
 			write(" (");
-			ex.accept(this);
+			ex.accept(this); // FIXME ? See hack in visit(CSVariableDeclaration)
 			write(")");
 		}
+		//System.out.println("visit(CSCatchClause node) 2");
 		writeLine();
 		node.body().accept(this);
 	}
@@ -825,35 +882,46 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	public void visit(CSArrayCreationExpression node) {
-		if (node.initializer() != null) {
-			write("ArrayUtils.CreateAndInit");
-		} else {
-			write("ArrayUtils.Create");
-		}
-
-		// HACK: predetect if multidimensional array and add indicator
-		if (node.elementType() instanceof CSArrayTypeReference) {
-			CSArrayTypeReference csArrayTypeReference = (CSArrayTypeReference) node
-					.elementType();
-			write(Integer.toString(csArrayTypeReference.dimensions()));
-		}
-
-		write("<");
-		node.elementType().accept(this);
-		write(">(");
-
-		if (null != node.length()) {
-			node.length().accept(this);
-		} else {
-			write("-1");
-		}
-
+		
+		// FIXME
+		System.out.println("HaxePrinter.visit(CSArrayCreationExpression node): FIXME");
+		
+//		if (node.initializer() != null) {
+//			write("ArrayUtils.CreateAndInit");
+//		} else {
+//			write("ArrayUtils.Create");
+//		}
+//
+//		// HACK: predetect if multidimensional array and add indicator
+//		if (node.elementType() instanceof CSArrayTypeReference) {
+//			CSArrayTypeReference csArrayTypeReference = (CSArrayTypeReference) node
+//					.elementType();
+//			write(Integer.toString(csArrayTypeReference.dimensions()));
+//		}
+//
+//		write("<");
+//		node.elementType().accept(this);
+//		write(">(");
+//
+//		if (null != node.length()) {
+//			node.length().accept(this);
+//		} else {
+//			write("-1");
+//		}
+//
+//		if (null != node.initializer()) {
+//			write(", ");
+//			node.initializer().accept(this);
+//		}
+//
+//		write(")");
+		
 		if (null != node.initializer()) {
-			write(", ");
 			node.initializer().accept(this);
+		} else {
+			write("[]");
 		}
-
-		write(")");
+		
 	}
 
 	public void visit(CSArrayInitializerExpression node) {
@@ -880,12 +948,14 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	public void visit(CSCastExpression node) {
-		write("(");
-		node.type().accept(this);
-		write(")");
+		// cast (expr, Type); // safe cast
+		write("cast (");
 		if (null != node.expression()) {
 			node.expression().accept(this);
 		}
+		write(", ");
+		node.type().accept(this);
+		write(")");
 	}
 
 	public void visit(CSReferenceExpression node) {
@@ -1072,7 +1142,7 @@ public class HaxePrinter extends CSVisitor {
 		for (CSFieldModifier m : node.modifiers()) {
 			String s = m.toString().toLowerCase();
 			if (s.equals("const")) {
-				write("inline ");
+				write("static ");
 			} else if (s.equals("readonly")) {
 			} else {
 				write(m.toString().toLowerCase());
@@ -1189,6 +1259,10 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	private void write(String s) {
+		/*if (s.equals("is")) {
+			Throwable t = new Throwable();
+			t.printStackTrace();
+		}*/
 		_writer.write(s);
 	}
 

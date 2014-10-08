@@ -123,7 +123,7 @@ public abstract class Configuration {
     }
 
 	protected void setUpStringMappings() {		
-		mapType("java.lang.StringBuffer", "System.Text.StringBuilder");
+		/*mapType("java.lang.StringBuffer", "System.Text.StringBuilder");
 	    mapProperty("java.lang.StringBuffer.length", "Length");
 	    mapMethod("java.lang.StringBuffer.append", "Append");	    
 	    mapMethod("java.lang.StringBuffer.insert", "Insert");
@@ -163,21 +163,22 @@ public abstract class Configuration {
 	    mapMethod("java.lang.String.String(byte[],int,int,java.lang.String)", runtimeMethod("getStringForBytes"));
 	    mapMethod("java.lang.String.String(byte[],java.lang.String)", runtimeMethod("getStringForBytes"));
 	    mapProperty("java.lang.String.length", "Length");
-	    mapProperty("java.lang.CharSequence.length", "Length");
+	    mapProperty("java.lang.CharSequence.length", "Length");*/
 	}
 
 	protected void setUpIoMappings() {
-		mapProperty("java.lang.System.out", "System.Console.Out");
-		mapProperty("java.lang.System.err", "System.Console.Error");
-		
-		mapType("java.io.PrintStream", "System.IO.TextWriter");
+//		mapProperty("java.lang.System.out", "System.Console.Out");
+//		mapProperty("java.lang.System.err", "System.Console.Error");
+//		
+//		mapType("java.io.PrintStream", "System.IO.TextWriter");
+//
+//		mapType("java.io.Writer", "System.IO.TextWriter");
+//		mapMethod("java.io.Writer.flush", "Flush");
+//		mapType("java.io.StringWriter", "System.IO.StringWriter");
+//
+//		mapMethod("java.io.PrintStream.print", "Write");
+//		mapMethod("java.io.PrintStream.println", "WriteLine");
 
-		mapType("java.io.Writer", "System.IO.TextWriter");
-		mapMethod("java.io.Writer.flush", "Flush");
-		mapType("java.io.StringWriter", "System.IO.StringWriter");
-
-		mapMethod("java.io.PrintStream.print", "Write");
-		mapMethod("java.io.PrintStream.println", "WriteLine");			
 	}
 
 	protected String collectionRuntimeMethod(String methodName) {
@@ -216,6 +217,57 @@ public abstract class Configuration {
 	public void enableNativeTypeSystem() {
 		_nativeTypeSystem = true;
 		
+//		mapType("java.lang.ClassNotFoundException", "System.TypeLoadException");
+//		mapType("java.lang.reflect.InvocationTargetException", "System.Reflection.TargetInvocationException");
+//		mapProperty("java.lang.reflect.InvocationTargetException.getTargetException", "InnerException");
+//		mapType("java.lang.IllegalAccessException", "System.MemberAccessException");
+//		
+////		mapType("java.lang.reflect.Array", "System.Array");
+//		mapMethod("java.lang.reflect.Array.getLength", runtimeMethod("GetArrayLength"));
+//		mapMethod("java.lang.reflect.Array.get", runtimeMethod("GetArrayValue"));
+//		mapMethod("java.lang.reflect.Array.set", runtimeMethod("SetArrayValue"));
+//		mapMethod("java.lang.reflect.Array.newInstance", "System.Array.CreateInstance");
+//		
+//		//mapMethod("java.lang.Object.getClass", "GetType");
+//		mapType("java.lang.Class", "System.Type");
+//		mapType("java.lang.Class<>", "System.Type");
+//		mapJavaLangClassProperty("getName", "FullName");
+//		mapJavaLangClassProperty("getSuperclass", "BaseType");
+//		mapJavaLangClassProperty("isArray", "IsArray");
+//		mapJavaLangClassProperty("isPrimitive", "IsPrimitive");
+//		mapJavaLangClassProperty("isInterface", "IsInterface");
+//		mapJavaLangClassMethod("isInstance", "IsInstanceOfType");
+//		mapJavaLangClassMethod("newInstance", "System.Activator.CreateInstance");
+//		mapJavaLangClassMethod("forName", runtimeMethod("GetType"));
+//		mapJavaLangClassMethod("getComponentType", "GetElementType");
+//		mapJavaLangClassMethod("getField", "GetField");
+//		mapJavaLangClassMethod("getFields", "GetFields");
+//		mapJavaLangClassMethod("getDeclaredField", runtimeMethod("GetDeclaredField"));		
+//		mapJavaLangClassMethod("getDeclaredFields", runtimeMethod("GetDeclaredFields"));
+//		mapJavaLangClassMethod("getDeclaredMethod", runtimeMethod("GetDeclaredMethod"));
+//		mapJavaLangClassMethod("getDeclaredMethods", runtimeMethod("GetDeclaredMethods"));
+//		mapJavaLangClassMethod("isAssignableFrom", "IsAssignableFrom");
+//		
+//		mapProperty("java.lang.reflect.Member.getName", "Name");
+//		mapProperty("java.lang.reflect.Member.getDeclaringClass", "DeclaringType");
+//		
+//		mapType("java.lang.reflect.Field", "System.Reflection.FieldInfo");
+//		mapProperty("java.lang.reflect.Field.getName", "Name");
+//		mapMethod("java.lang.reflect.Field.get", "GetValue");
+//		mapMethod("java.lang.reflect.Field.set", "SetValue");
+//		
+//		mapType("java.lang.reflect.Method", "System.Reflection.MethodInfo");
+//		mapProperty("java.lang.reflect.Method.getName", "Name");
+//		mapProperty("java.lang.reflect.Method.getReturnType", "ReturnType");
+//		mapMethod("java.lang.reflect.Method.getParameterTypes", runtimeMethod("GetParameterTypes"));
+//		removeMethod("java.lang.reflect.AccessibleObject.setAccessible");
+//		mapType("java.lang.reflect.Constructor", "System.Reflection.ConstructorInfo");
+//		
+//		mapMethod("java.lang.String.valueOf", "ToString");
+		
+		mapNamespace("java", "jaxe");
+		
+		/*
 		mapType("java.lang.ClassNotFoundException", "System.TypeLoadException");
 		mapType("java.lang.reflect.InvocationTargetException", "System.Reflection.TargetInvocationException");
 		mapProperty("java.lang.reflect.InvocationTargetException.getTargetException", "InnerException");
@@ -263,6 +315,7 @@ public abstract class Configuration {
 		mapType("java.lang.reflect.Constructor", "System.Reflection.ConstructorInfo");
 		
 		mapMethod("java.lang.String.valueOf", "ToString");
+ * */
 	}
 
 	private void mapJavaLangClassProperty(String methodName, String propertyName) {

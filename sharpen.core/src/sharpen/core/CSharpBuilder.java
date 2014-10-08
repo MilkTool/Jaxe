@@ -33,7 +33,6 @@ import sharpen.core.Configuration.*;
 import sharpen.core.csharp.ast.*;
 import sharpen.core.framework.*;
 import static sharpen.core.framework.StaticImports.*;
-
 import static sharpen.core.framework.Environments.*;
 
 public class CSharpBuilder extends ASTVisitor {
@@ -2028,15 +2027,15 @@ public class CSharpBuilder extends ASTVisitor {
 
 		String token = node.getToken();
 		CSExpression literal = new CSNumberLiteralExpression(token);
-
+		
 		if (expectingType ("byte") && token.startsWith("-")) {
-			literal = uncheckedCast ("byte",literal);
+			literal = uncheckedCast ("JByte",literal); // byte
 		}
 		else if (token.startsWith("0x")) {
 			if (token.endsWith("l") || token.endsWith("L")) {
-				literal = uncheckedCast("long", literal);
+				literal = uncheckedCast("JLong", literal); // long
 			} else {
-				literal = uncheckedCast("int", literal);
+				literal = uncheckedCast("JInt", literal); // int
 			}
 
 		} else if (token.startsWith("0") && token.indexOf('.') == -1 && Character.isDigit(token.charAt(token.length() - 1))) {
@@ -2046,8 +2045,10 @@ public class CSharpBuilder extends ASTVisitor {
 					literal = new CSNumberLiteralExpression("0x" + Integer.toHexString(n));
 			} catch (NumberFormatException ex){
 			}
+ 		} else if (token.endsWith("f") || token.endsWith("F")) {
+ 			literal = new CSNumberLiteralExpression(token.substring(0, token.length() - 1));
  		}
-
+		
 		pushExpression(literal);
 		return false;
 	}
@@ -2060,7 +2061,7 @@ public class CSharpBuilder extends ASTVisitor {
 	public boolean visit(StringLiteral node) {
 		String value = node.getLiteralValue();
 		if (value != null && value.length() == 0) {
-			pushExpression(new CSReferenceExpression("string.Empty"));
+			pushExpression(new CSReferenceExpression("\"\"")); // "string.Empty"
 		} else {
 			pushExpression(new CSStringLiteralExpression(fixEscapedNumbers (node.getEscapedValue())));
 		}
@@ -2392,7 +2393,9 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	public boolean visit(InstanceofExpression node) {
-		pushExpression(new CSInfixExpression("is", mapExpression(node.getLeftOperand()), mappedTypeReference(node
+//		pushExpression(new CSInfixExpression("is", mapExpression(node.getLeftOperand()), mappedTypeReference(node
+//		        .getRightOperand().resolveBinding())));
+		pushExpression(new CSInstanceofExpression(mapExpression(node.getLeftOperand()), mappedTypeReference(node
 		        .getRightOperand().resolveBinding())));
 		return false;
 	}
@@ -3353,10 +3356,10 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 	
 	private boolean isValidCSInterface (ITypeBinding type) {
-		if (type.getTypeDeclaration().getQualifiedName().equals("java.util.Iterator") || type.getTypeDeclaration().getQualifiedName().equals("java.lang.Iterable"))
-			return false;
-		if (type.getDeclaredFields().length != 0)
-			return false;
+//		if (type.getTypeDeclaration().getQualifiedName().equals("java.util.Iterator") || type.getTypeDeclaration().getQualifiedName().equals("java.lang.Iterable"))
+//			return false;
+//		if (type.getDeclaredFields().length != 0)
+//			return false;
 		return true;
 	}
 
