@@ -56,11 +56,25 @@ public class MappingsImpl implements Mappings {
 			methodName = name;
 		}
 		else {
-			methodName = name + (overloads.size() - 1);
+			//methodName = name + (overloads.size() - 1);
+			ITypeBinding[] types = binding.getParameterTypes();
+			methodName = name + fixMethodSignature(types);
+			System.out.println("Fix method overloading in class \"" + binding.getDeclaringClass().getQualifiedName() + "\": " + methodName);
 		}
 		_methodOverloads.put(binding, methodName);
 	
 		return methodName;
+	}
+	
+	private String fixMethodSignature(ITypeBinding[] types) {
+		String methodSignature = "";
+		for (int i = 0; i < types.length; i++) {
+			methodSignature += "_" + types[i].getQualifiedName().replace('.', '_').replace('[', '$').replace(']', '$');
+			methodSignature = methodSignature.replace("_java_lang_", "_");
+			// System.out.println("parameter type: "+
+			// types[i].getQualifiedName());
+		}
+		return methodSignature;
 	}
 	
 	//@Override
@@ -74,7 +88,16 @@ public class MappingsImpl implements Mappings {
 		}
 		Map<IMethodBinding, String> names = _constructorMethods.get(type);
 		if(!names.containsKey(ctor)) {
-			names.put(ctor, "__ctor" + names.size());
+			//System.out.println("ctor=" + ctor);
+			String constructorName = "__ctor";
+			if (ctor != null) {
+				ITypeBinding[] types = ctor.getParameterTypes();
+				constructorName += fixMethodSignature(types);
+				System.out.println("Fix constructor overloading for class \"" + ctor.getDeclaringClass().getQualifiedName() + "\": " + constructorName);
+			}
+			names.put(ctor, constructorName);
+			
+			//names.put(ctor, "__ctor" + names.size());
 			//names.put(ctor, "__create_" + ctor.getDeclaringClass().getName() + names.size());
 			//System.out.println("__create_" + ctor.getDeclaringClass().getName() + names.size() + "  ----  " + ctor.getDeclaringClass().getBinaryName());
 		}
