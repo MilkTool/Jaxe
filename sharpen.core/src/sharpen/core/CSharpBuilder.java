@@ -1498,6 +1498,12 @@ public class CSharpBuilder extends ASTVisitor {
 			ITypeBinding type = ctor.getDeclaringClass();
 			CSConstructor csCtor = (CSConstructor)method;
 			csCtor.constructorMethod(my(Mappings.class).constructorMethod(type, ctor));
+			
+			IMethodBinding overriden = getOverridedMethod(node);
+			if (overriden != null) {
+				System.out.println("constructor "+ ctor.getName() + " is overriden ! ");
+				csCtor.setOverride(true);
+			}
 		}
 		
 		IMethodBinding overriden = getOverridedMethod(node);
@@ -2033,7 +2039,8 @@ public class CSharpBuilder extends ASTVisitor {
 		}
 		else if (token.startsWith("0x")) {
 			if (token.endsWith("l") || token.endsWith("L")) {
-				literal = uncheckedCast("JLong", literal); // long
+				//literal = uncheckedCast("JLong", literal); // long
+				literal = new CSNumberLiteralExpression("JLongObject.decodeLongString(\"" + token + "\")");
 			} else {
 				literal = uncheckedCast("JInt", literal); // int
 			}
@@ -2045,8 +2052,10 @@ public class CSharpBuilder extends ASTVisitor {
 					literal = new CSNumberLiteralExpression("0x" + Integer.toHexString(n));
 			} catch (NumberFormatException ex){
 			}
- 		} else if (token.endsWith("f") || token.endsWith("F")) {
+ 		} else if (token.endsWith("f") || token.endsWith("F") || token.endsWith("d") || token.endsWith("D")) {
  			literal = new CSNumberLiteralExpression(token.substring(0, token.length() - 1));
+ 		} else if (token.endsWith("l") || token.endsWith("L")) {
+ 			literal = new CSNumberLiteralExpression("JLongObject.decodeLongString(\"" + token + "\")");
  		}
 		
 		pushExpression(literal);

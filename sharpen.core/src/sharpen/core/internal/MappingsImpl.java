@@ -28,6 +28,18 @@ public class MappingsImpl implements Mappings {
 	private Map<String, List<IMethodBinding>> _overloadLookup = new HashMap<String, List<IMethodBinding>>();
 	private Map<IMethodBinding,String> _methodOverloads = new HashMap();
 	
+	private boolean isMethodOverloaded(IMethodBinding binding) {
+		
+		IMethodBinding[] bindings = binding.getDeclaringClass().getDeclaredMethods();
+		int overloadSize = 0;
+		for (IMethodBinding b : bindings) {
+			if(b.getName().equals(binding.getName())) {
+				overloadSize++;
+			}
+		}
+		return overloadSize >= 2;
+	}
+	
 	//@Override
 	public String methodOverload(IMethodBinding binding, String name) {
 		// check if method already registered
@@ -36,6 +48,7 @@ public class MappingsImpl implements Mappings {
 		}
 		
 		String fqn = binding.getDeclaringClass().getQualifiedName() + "." + binding.getName();
+		//System.out.println("methodOverload: " + fqn);
 
 		// create overload lookup table if needed
 		List<IMethodBinding> overloads;
@@ -51,16 +64,36 @@ public class MappingsImpl implements Mappings {
 		overloads.add(binding);
 		
 		// create method name for new overload
-		String methodName;
-		if(overloads.size() == 1) {
-			methodName = name;
-		}
-		else {
-			//methodName = name + (overloads.size() - 1);
-			ITypeBinding[] types = binding.getParameterTypes();
-			methodName = name + fixMethodSignature(types);
-			System.out.println("Fix method overloading in class \"" + binding.getDeclaringClass().getQualifiedName() + "\": " + methodName);
-		}
+		String methodName = name;
+		
+//		// Check if the method overrides a superclass method
+//		boolean isOverriding = false;
+//		ITypeBinding superClass = binding.getDeclaringClass().getSuperclass();
+//		if (superClass != null) {
+//			IMethodBinding[] bindings = superClass.getDeclaredMethods();
+//			for (IMethodBinding b : bindings) {
+//				if (binding.overrides(b)) {
+//					System.out.println(binding.getDeclaringClass().getName() + "." + binding.getName() + " is overriding " + b.getDeclaringClass().getName() + "." + b.getName());
+//					isOverriding = true;
+//				}
+//			}
+//		}
+//		
+//		System.out.println("methodOverload: " + fqn + "  overloaded=" + isMethodOverloaded(binding));
+//		if((!isOverriding) && (!isMethodOverloaded(binding))) {
+//			methodName = name;
+//		}
+//		else {
+//			//methodName = name + (overloads.size() - 1);
+//			ITypeBinding[] types = binding.getParameterTypes();
+//			methodName = name + fixMethodSignature(types);
+//			System.out.println("Fix method overloading in class \"" + binding.getDeclaringClass().getQualifiedName() + "\": " + methodName);
+//		}
+			
+		ITypeBinding[] types = binding.getParameterTypes();
+		methodName = name + fixMethodSignature(types);
+		System.out.println("Fix method overloading in class \"" + binding.getDeclaringClass().getQualifiedName() + "\": " + methodName);
+			
 		_methodOverloads.put(binding, methodName);
 	
 		return methodName;
@@ -69,7 +102,7 @@ public class MappingsImpl implements Mappings {
 	private String fixMethodSignature(ITypeBinding[] types) {
 		String methodSignature = "";
 		for (int i = 0; i < types.length; i++) {
-			methodSignature += "_" + types[i].getQualifiedName().replace('.', '_').replace('[', '$').replace(']', '$');
+			methodSignature += "_" + types[i].getQualifiedName().replace('.', '_').replace('[', '6').replace(']', '9');
 			methodSignature = methodSignature.replace("_java_lang_", "_");
 			// System.out.println("parameter type: "+
 			// types[i].getQualifiedName());
@@ -93,7 +126,7 @@ public class MappingsImpl implements Mappings {
 			if (ctor != null) {
 				ITypeBinding[] types = ctor.getParameterTypes();
 				constructorName += fixMethodSignature(types);
-				System.out.println("Fix constructor overloading for class \"" + ctor.getDeclaringClass().getQualifiedName() + "\": " + constructorName);
+				System.out.println("Fix constructor \"" + ctor.getName() + "\" overloading for class \"" + ctor.getDeclaringClass().getQualifiedName() + "\": " + constructorName);
 			}
 			names.put(ctor, constructorName);
 			

@@ -27,6 +27,8 @@ public class CSConstructor extends CSMethodBase {
 	
 	private CSConstructorModifier _modifier;
 	private String _constructorMethod;
+	
+	private boolean isOverriding = false;
 
 	public CSConstructor() {
 		this(CSConstructorModifier.None);
@@ -69,4 +71,13 @@ public class CSConstructor extends CSMethodBase {
 	public void constructorMethod(String constructorMethod) {
 		_constructorMethod = constructorMethod;
 	}
+	
+	public void setOverride(boolean b) {
+		isOverriding = b;
+	}
+	
+	public boolean isOverriding() {
+		return isOverriding;
+	}
+
 }

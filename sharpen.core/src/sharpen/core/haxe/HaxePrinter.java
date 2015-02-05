@@ -355,6 +355,21 @@ public class HaxePrinter extends CSVisitor {
 	        }
 	        leaveBody();
 	        writeLine();
+	        
+	        if (node.constructors().size() == 0) {
+	        	writeIndentation();
+	        	boolean isAbstract = (node instanceof CSClass) && (((CSClass)node).modifier() == CSClassModifier.Abstract);
+				writeVisibility(isAbstract ? CSVisibility.Protected : CSVisibility.Public);
+	        	writeLine("function __ctor()");
+	        	enterBody();
+	        	if(chained == null) {
+	        		writeIndentedLine("super.__ctor();");
+	        	}
+	        	writeIndentedLine("return this;");
+	        	leaveBody();
+		        writeLine();
+	        }
+	        
 		}
 		CSTypeDeclaration saved = _currentType;
 		_currentType = node;
@@ -424,6 +439,11 @@ public class HaxePrinter extends CSVisitor {
 			node.body().accept(this);
 		} else {
 			writeVisibility(node);
+			//System.out.println(node.constructorMethod() +  " constructor modifier: " + node.modifier().name());
+			//write(methodModifier(node.modifier());
+			if (node.isOverriding()) {
+				write("override ");
+			}
 			write("function " + node.constructorMethod());
 			writeParameterList(node);
 			writeLine();
@@ -540,14 +560,14 @@ public class HaxePrinter extends CSVisitor {
 		}
 	}
 	
-	@Override
-	public void visit(CSInstanceofExpression node) {
-		write("Jaxe.instanceof(");
-		node.lhs().accept(this);
-		write(", ");
-		node.rhs().accept(this);
-		write(")");
-	}
+//	@Override
+//	public void visit(CSInstanceofExpression node) {
+//		write("Jaxe.instanceof(");
+//		node.lhs().accept(this);
+//		write(", ");
+//		node.rhs().accept(this);
+//		write(")");
+//	}
 
 	private void printPrecedingComments(CSNode node) {
 		printPrecedingComments(node.startPosition());
@@ -1168,6 +1188,9 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	private String methodModifier(CSMethodModifier modifier) {
+		
+		//System.out.println("methodModifier: "  + modifier.name());
+		
 		switch (modifier) {
 		case Static:
 			return "static ";

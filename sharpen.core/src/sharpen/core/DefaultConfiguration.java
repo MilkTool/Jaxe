@@ -74,14 +74,14 @@ public class DefaultConfiguration extends Configuration {
 		
 		mapType("java.lang.Object", "jaxe.lang.JObject");
 		mapType("java.lang.String", "jaxe.lang.JString");
-		mapType("java.lang.Character", "jaxe.lang.JChar");
-		mapType("java.lang.Byte", "jaxe.lang.JByte");
-		mapType("java.lang.Boolean", "jaxe.lang.JBoolean"); // FIXME
-		mapType("java.lang.Short", "jaxe.lang.JShort");
-		mapType("java.lang.Integer", "jaxe.lang.JInt");
-		mapType("java.lang.Long", "jaxe.lang.JLong");
-		mapType("java.lang.Float", "jaxe.lang.JFloat");
-		mapType("java.lang.Double", "jaxe.lang.JDouble");
+		mapType("java.lang.Character", "jaxe.lang.JCharObject");
+		mapType("java.lang.Byte", "jaxe.lang.JByteObject");
+		mapType("java.lang.Boolean", "jaxe.lang.JBooleanObject"); // FIXME
+		mapType("java.lang.Short", "jaxe.lang.JShortObject");
+		mapType("java.lang.Integer", "jaxe.lang.JIntObject");
+		mapType("java.lang.Long", "jaxe.lang.JLongObject");
+		mapType("java.lang.Float", "jaxe.lang.JFloatObject");
+		mapType("java.lang.Double", "jaxe.lang.JDoubleObject");
 		
 		/*mapType("boolean", "Bool");
 		mapType("void", "Void");
@@ -226,14 +226,14 @@ public class DefaultConfiguration extends Configuration {
 //		mapWrapperConstructor("java.lang.Float.Float", "haxen.Convert.toSingle", "Float");
 //		mapWrapperConstructor("java.lang.Double.Double", "haxen.Convert.toDouble", "Float");
 		
-		mapWrapperConstructor("java.lang.Boolean.Boolean", "JBoolean.valueOf", "Boolean");
-		mapWrapperConstructor("java.lang.Byte.Byte", "JByte.valueOf", "Byte");
-		mapWrapperConstructor("java.lang.Character.Character", "JChar.valueOf", "Char");
-		mapWrapperConstructor("java.lang.Short.Short", "JShort.valueOf", "Short");
-		mapWrapperConstructor("java.lang.Integer.Integer", "JInt.valueOf", "Int");
-		mapWrapperConstructor("java.lang.Long.Long", "JLong.valueOf", "Long");
-		mapWrapperConstructor("java.lang.Float.Float", "JFloat.valueOf", "Float");
-		mapWrapperConstructor("java.lang.Double.Double", "JDouble.valueOf", "Double");
+		mapWrapperConstructor("java.lang.Boolean.Boolean", "JBooleanObject.valueOf_boolean", "Boolean");
+		mapWrapperConstructor("java.lang.Byte.Byte", "JByteObject.valueOf_byte", "Byte");
+		mapWrapperConstructor("java.lang.Character.Character", "JCharObject.valueOf_char", "Char");
+		mapWrapperConstructor("java.lang.Short.Short", "JShortObject.valueOf_short", "Short");
+		mapWrapperConstructor("java.lang.Integer.Integer", "JIntObject.valueOf_int", "Int");
+		mapWrapperConstructor("java.lang.Long.Long", "JLongObject.valueOf_long", "Long");
+		mapWrapperConstructor("java.lang.Float.Float", "JFloatObject.valueOf_float", "Float");
+		mapWrapperConstructor("java.lang.Double.Double", "JDoubleObject.valueOf_double", "Double");
     }	
 	
 	public boolean isIgnoredExceptionType(String exceptionType) {
